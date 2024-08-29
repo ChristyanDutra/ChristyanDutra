@@ -1,7 +1,4 @@
 <h1 align="center">Hi 👋, I'm Christyan Alex</h1>
-<h3 align="center">Avid Data Science enthusiast.</h3>
-
-- 🌱 I’m currently learning **Python / Machine Learning**
 
 - 📫 How to reach me **https://www.linkedin.com/in/christyan-alex/**
 
