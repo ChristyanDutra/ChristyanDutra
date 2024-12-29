@@ -1,7 +1,7 @@
 <h1 align="center">Hi 👋, I'm Christyan Alex</h1>
 <h3 align="center">Bachelor's Degree at the Federal Institute of Minas Gerais</h3>
 
-- 🌱 I’m currently learning **Java, Spring Boot, Docker, Kubernetes, SQL**
+- 🌱 I’m currently learning **Java, Spring Boot, Docker, Kubernetes, SQL, Angular, Flutter, Kotlin, CI/CD**
 
 - 📫 How to reach me **https://www.linkedin.com/in/christyan-alex/**
 
