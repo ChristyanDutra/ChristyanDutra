@@ -3,8 +3,6 @@
 
 - 🌱 I’m currently learning **I'm an Information Technology student passionate about Cybersecurity and focused on building a solid career in data and systems protection. I'm currently exploring the world of Defensive Security (Blue Team) and deepening my knowledge in log analysis and incident response.**
 
-- 📫 How to reach me **https://www.linkedin.com/in/christyan-alex/**
-
 <h3 align="left">Connect with me:</h3>
 <p align="left">
 <a href="https://linkedin.com/in/https://www.linkedin.com/in/christyan-alex/" target="blank"><img align="center" src="https://raw.githubusercontent.com/rahuldkjain/github-profile-readme-generator/master/src/images/icons/Social/linked-in-alt.svg" alt="https://www.linkedin.com/in/christyan-alex/" height="30" width="40" /></a>
