@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mapa Mental — Bacharelado em Sistemas de Informação (IFMG Ouro Branco)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f5f7; --paper:#fff; --ink:#1c2029; --ink-dim:#6b7280; --line:#d7dbe3;
+  --gold:#c98a2e; --gold-bg:#fff7e8;
+  --a1:#3f68d6; --a2:#7d4fc9; --a3:#0f9a83; --a4:#1f83b8; --a5:#d1552f;
+  --a6:#b23a84; --a7:#5f6b7a; --a8:#c98a2e; --a9:#2f8f45; --a10:#8f4fc9; --a11:#b89a1f;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',system-ui,sans-serif;}
+header{
+  padding:20px 24px 14px; border-bottom:1px solid var(--line); background:var(--paper);
+  position:sticky; top:0; z-index:5;
+}
+.eyebrow{font-size:12px; color:var(--gold); font-weight:700; margin:0 0 4px; letter-spacing:.02em;}
+h1{font-family:'Space Grotesk',sans-serif; font-size:clamp(19px,2.6vw,25px); margin:0 0 6px;}
+.subtitle{color:var(--ink-dim); font-size:13px; max-width:640px; margin:0 0 10px;}
+.toolbar{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+#search{
+  font-size:13px; padding:7px 11px; border-radius:8px; border:1px solid var(--line); width:190px; outline:none;
+}
+#resetbtn{
+  font-size:12.5px; font-weight:600; padding:7px 12px; border-radius:8px; border:1px solid var(--line);
+  background:var(--paper); color:var(--ink-dim); cursor:pointer;
+}
+.legend{display:flex; flex-wrap:wrap; gap:6px 12px; font-size:11.5px; color:var(--ink-dim); margin-left:auto;}
+.legend span{display:inline-flex; align-items:center; gap:5px;}
+.legend i{width:9px; height:9px; border-radius:50%; display:inline-block;}
+
+#scroller{overflow:auto; height:calc(100vh - 118px);}
+#canvas{position:relative; margin:24px;}
+svg#lines{position:absolute; top:0; left:0; pointer-events:none;}
+.node-box{
+  position:absolute; background:var(--paper); border:1px solid var(--line); border-radius:9px;
+  box-shadow:0 1px 2px rgba(20,20,30,.05); cursor:pointer; overflow:hidden;
+  transition:box-shadow .12s, border-color .12s, opacity .15s;
+}
+.node-box:hover{box-shadow:0 3px 10px rgba(20,20,30,.12);}
+.node-box.dim{opacity:.22;}
+.node-box.lit{border-color:var(--gold); box-shadow:0 0 0 2px var(--gold-bg), 0 3px 10px rgba(0,0,0,.12); z-index:3;}
+
+.box-course{
+  background:var(--ink); color:#fff; text-align:center; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;
+  line-height:1.25; border:none; cursor:default;
+}
+.box-area{
+  padding:8px 12px; display:flex; flex-direction:column; justify-content:center; border-left:5px solid;
+}
+.box-area b{font-family:'Space Grotesk',sans-serif; font-size:12.5px; line-height:1.25;}
+.box-area span{font-size:10.5px; color:var(--ink-dim); margin-top:2px;}
+.box-disc{padding:6px 10px; border-left:4px solid; display:flex; flex-direction:column; justify-content:center;}
+.box-disc b{font-size:11px; line-height:1.25; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-weight:600;}
+.box-disc span{font-size:9.5px; color:var(--ink-dim); margin-top:2px;}
+.box-career{
+  padding:8px 12px; border:1.5px solid var(--gold); background:var(--gold-bg); display:flex; align-items:center;
+  justify-content:center; text-align:center;
+}
+.box-career b{font-size:11.5px; font-family:'Space Grotesk',sans-serif; line-height:1.25;}
+
+#info{
+  position:fixed; right:16px; bottom:16px; z-index:6; width:300px; max-height:46vh; overflow-y:auto;
+  background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:14px 16px;
+  box-shadow:0 8px 30px rgba(0,0,0,.15); display:none;
+}
+#info h3{font-family:'Space Grotesk',sans-serif; font-size:15px; margin:0 0 6px;}
+#info p{font-size:12.5px; color:var(--ink-dim); margin:0 0 10px;}
+#info .irow{font-size:11.5px; padding:4px 0; border-top:1px solid var(--line);}
+#info .irow:first-of-type{border-top:none;}
+#info .ipill{display:inline-block; font-size:9.5px; padding:1px 6px; border-radius:20px; color:#fff; margin-right:6px;}
+@media (max-width:720px){ #info{left:16px; right:16px; width:auto;} .legend{display:none;} }
+</style>
+</head>
+<body>
+<header>
+  <p class="eyebrow">MAPA MENTAL · ATIVIDADE 2026 · INSPIRADO NO ROADMAP.SH</p>
+  <h1>Trilhas do Bacharelado em Sistemas de Informação</h1>
+  <p class="subtitle">Do curso às áreas, das áreas às disciplinas, e das disciplinas às carreiras — role a tela na horizontal e na vertical. Clique numa disciplina ou numa carreira para ver o caminho completo entre elas. Aluno: <b>Christyan Alex Pereira Dutra</b> · Fonte: PPC BSI, IFMG Ouro Branco, 2022.</p>
+  <div class="toolbar">
+    <input id="search" placeholder="Buscar disciplina ou carreira...">
+    <button id="resetbtn">↺ limpar seleção</button>
+    <div class="legend" id="legend"></div>
+  </div>
+</header>
+<div id="scroller"><div id="canvas">
+  <svg id="lines"></svg>
+</div></div>
+<div id="info"></div>
+
+<script>
+const AREAS = [
+ {id:'A1', n:'Fundamentos de Programação', c:'--a1', d:'Base lógica e estrutural: da introdução à programação até projeto e análise de algoritmos.'},
+ {id:'A2', n:'Engenharia de Software', c:'--a2', d:'Processos, métodos e garantia de qualidade para construir sistemas.'},
+ {id:'A3', n:'Banco de Dados e Informação', c:'--a3', d:'Modelagem, administração e uso estratégico de dados.'},
+ {id:'A4', n:'Redes e Infraestrutura', c:'--a4', d:'Arquitetura, sistemas operacionais, redes e sistemas distribuídos.'},
+ {id:'A5', n:'Web, Mobile e Interfaces', c:'--a5', d:'Aplicações web e móveis com foco na experiência do usuário.'},
+ {id:'A6', n:'IA e Ciência de Dados', c:'--a6', d:'Técnicas de IA, mineração de dados e apoio à decisão.'},
+ {id:'A7', n:'Matemática e Fundamentos', c:'--a7', d:'Base matemática e lógico-formal da computação.'},
+ {id:'A8', n:'Gestão e Negócios', c:'--a8', d:'Visão organizacional, financeira e empreendedora.'},
+ {id:'A9', n:'Humanística e Comunicação', c:'--a9', d:'Ética, línguas, pesquisa e comunicação profissional.'},
+ {id:'A10', n:'Automação, Robótica e Jogos', c:'--a10', d:'Aplicações em automação, robótica e jogos digitais.'},
+ {id:'A11', n:'Projeto Integrador e TCC', c:'--a11', d:'Componentes de síntese, pesquisa e extensão do curso.'},
+];
+const CAREERS = [
+ {id:'c1', n:'Engenheiro(a) de Software'}, {id:'c2', n:'Programador(a) / Full-Stack'},
+ {id:'c3', n:'Web Designer / Front-end'}, {id:'c4', n:'Analista de Testes (QA)'},
+ {id:'c5', n:'Analista de Sistemas'}, {id:'c6', n:'Analista de Requisitos'},
+ {id:'c7', n:'Analista de Negócios'}, {id:'c8', n:'Admin. de Banco de Dados'},
+ {id:'c9', n:'Admin./Gerente de Redes'}, {id:'c10', n:'Gerente de Área de SI'},
+ {id:'c11', n:'Empresário(a) em TI'}, {id:'c12', n:'Consultor(a) em SI'},
+ {id:'c13', n:'Pesquisador(a) / Docente'}, {id:'c14', n:'Gerente de Projetos'},
+];
+const D = [
+['Ética e Legislação','OBBGSIN.044',32,'1º','A9',['c10','c11','c12']],
+['Introdução à Programação','OBBGSIN.085',64,'1º','A1',['c1','c2','c3']],
+['Introdução a Sist. de Informação','OBBGSIN.001',64,'1º','A9',['c5','c6','c7']],
+['Português Instrumental I','OBBGSIN.007',32,'1º','A9',['c7','c12']],
+['Pré-Cálculo','OBBGSIN.101',64,'1º','A7',[]],
+['Princípios da Administração I','OBBGSIN.011',64,'1º','A8',['c10','c11','c14']],
+['Algoritmos e Estrutura de Dados I','OBBGSIN.009',64,'2º','A1',['c1','c2']],
+['Cálculo Diferencial e Integral I','OBBGSIN.012',64,'2º','A7',[]],
+['Inglês Instrumental I','OBBGSIN.003',32,'2º','A9',[]],
+['Métodos e Técnicas de Pesquisa','OBBGSIN.002',32,'2º','A11',['c13']],
+['Programação Orientada a Objetos I','OBBGSIN.010',64,'2º','A1',['c1','c2','c3']],
+['Sist. Digitais e Circ. Combinacionais','OBBGSIN.013',64,'2º','A4',['c9']],
+['Algoritmos e Estrutura de Dados II','OBBGSIN.015',64,'3º','A1',['c1','c2','c13']],
+['Arquitetura e Org. de Computadores','OBBGSIN.024',64,'3º','A4',['c9']],
+['Banco de Dados I','OBBGSIN.016',64,'3º','A3',['c5','c8','c2']],
+['Contabilidade','OBBGSIN.018',64,'3º','A8',['c11','c12']],
+['Engenharia de Software I','OBBGSIN.017',64,'3º','A2',['c1','c5','c6','c2']],
+['Álgebra Linear e Geom. Analítica','OBBGSIN.021',64,'4º','A7',[]],
+['Matemática Discreta','OBBGSIN.020',64,'4º','A7',['c13']],
+['Programação Orientada a Objetos II','OBBGSIN.022',64,'4º','A1',['c1','c2','c3']],
+['Programação WEB','OBBGSIN.023',64,'4º','A5',['c2','c3']],
+['Sistemas Operacionais','OBBGSIN.030',64,'4º','A4',['c9','c1']],
+['Engenharia de Software II','OBBGSIN.041',64,'5º','A2',['c1','c5','c6','c14','c2']],
+['Governança e Gestão da Informação','OBBGSIN.019',64,'5º','A3',['c7','c10']],
+['Probabilidade e Estatística','OBBGSIN.031',64,'5º','A7',['c6']],
+['Redes de Computadores I','OBBGSIN.029',64,'5º','A4',['c9']],
+['Prog. para Dispositivos Móveis','OBBGSIN.039',64,'6º','A5',['c2','c3']],
+['Projeto e Análise de Algoritmos','OBBGSIN.038',64,'6º','A1',['c1','c13']],
+['Sistemas de Apoio à Decisão','OBBGSIN.036',64,'6º','A6',['c6','c7']],
+['Sistemas Distribuídos','OBBGSIN.037',64,'6º','A4',['c1','c9']],
+['Gestão de Projetos','OBBGSIN.040',32,'7º','A8',['c14','c10']],
+['Inteligência Artificial','OBBGSIN.034',64,'7º','A6',['c1','c13']],
+['Interface Humano Computador','OBBGSIN.026',64,'7º','A5',['c3','c6','c2']],
+['Trabalho de Conclusão de Curso I','OBBGSIN.091',64,'7º','A11',['c13']],
+['Empreendedorismo','OBBGSIN.102',64,'8º','A8',['c11']],
+['Qualidade de Software','OBBGSIN.103',64,'8º','A2',['c4','c1']],
+['Trabalho de Conclusão de Curso II','OBBGSIN.092',64,'8º','A11',['c13']],
+['Projeto Integrador','—',320,'1º–8º','A11',['c5','c7','c14']],
+['Atividades Complementares','—',220,'1º–8º','A11',['c13']],
+['Administração Financeira I','OBBGSIN.035',64,'OPT','A8',['c11','c12']],
+['Avaliação de Empresas','OBBGSIN.057',64,'OPT','A8',['c11','c12']],
+['Banco de Dados II','OBBGSIN.033',64,'OPT','A3',['c8']],
+['Cálculo Numérico','OBBGSIN.079',64,'OPT','A7',['c1']],
+['Comportamento Organizacional','OBBGSIN.025',64,'OPT','A8',['c10','c14']],
+['Computação Gráfica','OBBGSIN.070',64,'OPT','A5',['c3']],
+['Consultoria Empresarial','OBBGSIN.081',64,'OPT','A8',['c12']],
+['Gerência de Projetos de Software','OBBGSIN.049',64,'OPT','A2',['c14','c1']],
+['Gestão Ambiental','OBBGSIN.055',64,'OPT','A8',['c10']],
+['Gestão da Inovação','OBBGSIN.054',64,'OPT','A8',['c11']],
+['Gestão de Recursos Humanos','OBBGSIN.094',64,'OPT','A8',['c10']],
+['Gestão de Serviços','OBBGSIN.060',64,'OPT','A8',['c10']],
+['Gestão do Conhecimento','OBBGSIN.059',64,'OPT','A8',['c7']],
+['Inglês Instrumental II','OBBGSIN.006',32,'OPT','A9',[]],
+['Inglês para Negócios I','OBBGSIN.083',32,'OPT','A9',['c12']],
+['Inglês para Negócios II','OBBGSIN.084',32,'OPT','A9',['c12']],
+['Inteligência Competitiva','OBBGSIN.075',32,'OPT','A6',['c7']],
+['Libras','OBBGSIN.104',64,'OPT','A9',[]],
+['Linguagens Formais e Autômatos','OBBGSIN.028',64,'OPT','A1',['c13']],
+['Logística Reversa','OBBGSIN.050',32,'OPT','A8',['c10']],
+['Mineração de Dados','OBBGSIN.068',64,'OPT','A6',['c13','c7']],
+['Português Instrumental II','OBBGSIN.008',32,'OPT','A9',[]],
+['Processamento de Imagens','OBBGSIN.095',64,'OPT','A6',['c1']],
+['Qualidade de Vida no Trabalho','OBBGSIN.073',64,'OPT','A8',['c10']],
+['Redes de Computadores II','OBBGSIN.032',64,'OPT','A4',['c9']],
+['Sistemas de Garantia de Qualidade','OBBGSIN.074',64,'OPT','A2',['c4']],
+['Teoria dos Grafos','OBBGSIN.027',64,'OPT','A7',['c13']],
+['Tóp. Avançados em Banco de Dados','OBBGSIN.063',64,'OPT','A3',['c8','c13']],
+['Tóp. Avançados em Eng. de Software','OBBGSIN.078',64,'OPT','A2',['c1','c13']],
+['Tóp. Avançados em Intel. Artificial','OBBGSIN.096',64,'OPT','A6',['c1','c13']],
+['Tóp. Av. em Tec. de Educ. a Distância','OBBGSIN.067',64,'OPT','A9',['c13']],
+['Tóp. em Desenv. de Jogos Digitais','OBBGSIN.097',64,'OPT','A10',['c1','c3']],
+['Tópicos Especiais em Algoritmos','OBBGSIN.064',64,'OPT','A1',['c1','c13']],
+['Tópicos Especiais em Automação','OBBGSIN.098',64,'OPT','A10',['c1']],
+['Tóp. Especiais em Desenv. de Software','OBBGSIN.065',64,'OPT','A2',['c1','c2']],
+['Tópicos Especiais em Robótica','OBBGSIN.099',64,'OPT','A10',['c1']],
+['Tóp. Esp. em Sist. Comp. e Redes','OBBGSIN.066',64,'OPT','A4',['c9']],
+];
+const areaById = Object.fromEntries(AREAS.map(a=>[a.id,a]));
+const careerById = Object.fromEntries(CAREERS.map(c=>[c.id,c]));
+
+// ---------- layout ----------
+const COL_W = 200, COL_STEP = 232, MARGIN_X = 40;
+const AREA_Y = 130, AREA_H = 46, FIRST_DISC_Y = 196, DISC_GAP = 54, DISC_H = 42;
+const CAREER_BOX_W = 210, CAREER_GAP = 20, CAREER_H = 44, CAREER_ROW_GAP = 58, CAREERS_PER_ROW = 7;
+
+const areaDiscs = {};
+AREAS.forEach(a=> areaDiscs[a.id] = D.map((row,i)=>({row,id:'d'+i})).filter(x=>x.row[4]===a.id));
+
+let maxBottom = 0;
+AREAS.forEach(a=>{
+  const k = areaDiscs[a.id].length;
+  const bottom = FIRST_DISC_Y + (k-1)*DISC_GAP + DISC_H;
+  if(bottom>maxBottom) maxBottom = bottom;
+});
+const CAREER_Y0 = maxBottom + 70;
+const totalColsWidth = MARGIN_X*2 + AREAS.length*COL_STEP;
+const careerRowWidth = CAREERS_PER_ROW*(CAREER_BOX_W+CAREER_GAP)-CAREER_GAP;
+const careerStartX = Math.max(MARGIN_X, (totalColsWidth-careerRowWidth)/2);
+const totalWidth = Math.max(totalColsWidth, careerStartX+careerRowWidth+MARGIN_X);
+const totalHeight = CAREER_Y0 + Math.ceil(CAREERS.length/CAREERS_PER_ROW)*CAREER_ROW_GAP + 60;
+
+const canvas = document.getElementById('canvas');
+canvas.style.width = totalWidth+'px';
+canvas.style.height = totalHeight+'px';
+const svg = document.getElementById('lines');
+svg.setAttribute('width', totalWidth); svg.setAttribute('height', totalHeight);
+svg.setAttribute('viewBox', `0 0 ${totalWidth} ${totalHeight}`);
+
+function box(cls, x, y, w, h, html, id){
+  const el = document.createElement('div');
+  el.className = 'node-box '+cls;
+  el.style.left=x+'px'; el.style.top=y+'px'; el.style.width=w+'px'; el.style.height=h+'px';
+  el.innerHTML = html;
+  if(id) el.dataset.id = id;
+  canvas.appendChild(el);
+  return el;
+}
+function curve(x1,y1,x2,y2){
+  const dy = Math.max(30,(y2-y1)/2);
+  return `M${x1},${y1} C${x1},${y1+dy} ${x2},${y2-dy} ${x2},${y2}`;
+}
+function path(d, cls){
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d', d); p.setAttribute('class', cls); p.setAttribute('fill','none');
+  svg.appendChild(p); return p;
+}
+
+// course box
+const courseX = totalWidth/2 - 130, courseY = 24, courseW = 260, courseH = 60;
+box('box-course', courseX, courseY, courseW, courseH, 'Bacharelado em<br>Sistemas de Informação', 'CURSO');
+
+// area + discipline boxes
+const discPos = {}; // id -> {x,y,w,h,cx,cy(top/bottom)}
+AREAS.forEach((a,i)=>{
+  const x = MARGIN_X + i*COL_STEP;
+  box('box-area', x, AREA_Y, COL_W, AREA_H,
+    `<b>${a.n}</b><span>${areaDiscs[a.id].length} disciplinas</span>`, a.id);
+  a._x = x; a._cx = x+COL_W/2;
+  path(curve(courseX+courseW/2, courseY+courseH, a._cx, AREA_Y), 'struct-line');
+  let prevBottom = AREA_Y+AREA_H;
+  areaDiscs[a.id].forEach((item,j)=>{
+    const y = FIRST_DISC_Y + j*DISC_GAP;
+    const row = item.row;
+    box('box-disc', x, y, COL_W, DISC_H,
+      `<b>${row[0]}</b><span>${row[3]==='OPT'?'Optativa':row[3]+'º'} · ${row[2]}h</span>`, item.id)
+      .style.borderLeftColor = `var(${a.c})`;
+    path(`M${a._cx},${prevBottom} L${a._cx},${y}`, 'struct-line');
+    prevBottom = y+DISC_H;
+    discPos[item.id] = {x:a._cx, top:y, bottom:y+DISC_H, area:a.id, careers:row[5], name:row[0]};
+  });
+});
+
+// career boxes
+const careerPos = {};
+CAREERS.forEach((c,i)=>{
+  const rowI = Math.floor(i/CAREERS_PER_ROW), colI = i%CAREERS_PER_ROW;
+  const x = careerStartX + colI*(CAREER_BOX_W+CAREER_GAP);
+  const y = CAREER_Y0 + rowI*CAREER_ROW_GAP;
+  box('box-career', x, y, CAREER_BOX_W, CAREER_H, `<b>${c.n}</b>`, c.id);
+  careerPos[c.id] = {x:x+CAREER_BOX_W/2, top:y, bottom:y+CAREER_H};
+});
+
+document.querySelectorAll('.struct-line').forEach(l=> l.style.stroke='var(--line)');
+const style = document.createElement('style');
+style.textContent = `.struct-line{stroke:#c7cbd4; stroke-width:1.4px;} .dyn-line{stroke:var(--gold); stroke-width:2px;}`;
+document.head.appendChild(style);
+
+// ---------- legend ----------
+const legend = document.getElementById('legend');
+AREAS.forEach(a=>{
+  const s = document.createElement('span');
+  s.innerHTML = `<i style="background:var(${a.c})"></i>${a.n}`;
+  legend.appendChild(s);
+});
+
+// ---------- interaction ----------
+const info = document.getElementById('info');
+let dynPaths = [];
+function clearDyn(){ dynPaths.forEach(p=>p.remove()); dynPaths=[]; }
+function clearAll(){
+  clearDyn();
+  document.querySelectorAll('.node-box').forEach(n=> n.classList.remove('dim','lit'));
+  info.style.display='none';
+}
+function selectDisc(id){
+  clearDyn();
+  const d = discPos[id];
+  document.querySelectorAll('.node-box').forEach(n=> n.classList.add('dim'));
+  const el = document.querySelector(`[data-id="${id}"]`);
+  el.classList.remove('dim'); el.classList.add('lit');
+  document.querySelector(`[data-id="${d.area}"]`).classList.remove('dim');
+  d.careers.forEach(cid=>{
+    document.querySelector(`[data-id="${cid}"]`).classList.remove('dim');
+    const cp = careerPos[cid];
+    dynPaths.push(path(curve(d.x, d.bottom, cp.x, cp.top), 'dyn-line'));
+  });
+  const a = areaById[d.area];
+  info.style.display='block';
+  info.innerHTML = `<h3>${d.name}</h3><p><span class="ipill" style="background:var(${a.c})">${a.n}</span></p>
+    ${d.careers.length? d.careers.map(cid=>`<div class="irow">→ ${careerById[cid].n}</div>`).join(''):'<div class="irow">Disciplina de formação geral, sem carreira específica associada.</div>'}`;
+}
+function selectCareer(id){
+  clearDyn();
+  document.querySelectorAll('.node-box').forEach(n=> n.classList.add('dim'));
+  document.querySelector(`[data-id="${id}"]`).classList.remove('dim');
+  document.querySelector(`[data-id="${id}"]`).classList.add('lit');
+  const cp = careerPos[id];
+  const matches = Object.entries(discPos).filter(([,d])=> d.careers.includes(id));
+  matches.forEach(([did,d])=>{
+    document.querySelector(`[data-id="${did}"]`).classList.remove('dim');
+    document.querySelector(`[data-id="${d.area}"]`).classList.remove('dim');
+    dynPaths.push(path(curve(d.x, d.bottom, cp.x, cp.top), 'dyn-line'));
+  });
+  info.style.display='block';
+  info.innerHTML = `<h3>${careerById[id].n}</h3><p>Trilha de disciplinas do PPC que formam esse perfil profissional.</p>
+    ${matches.map(([,d])=>`<div class="irow">${d.name}</div>`).join('')}`;
+}
+document.querySelectorAll('[data-id]').forEach(el=>{
+  el.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const id = el.dataset.id;
+    if(id==='CURSO') return clearAll();
+    if(id.startsWith('d')) selectDisc(id);
+    else if(id.startsWith('c')) selectCareer(id);
+    else { // area
+      clearDyn();
+      document.querySelectorAll('.node-box').forEach(n=> n.classList.add('dim'));
+      el.classList.remove('dim'); el.classList.add('lit');
+      areaDiscs[id].forEach(item=> document.querySelector(`[data-id="${item.id}"]`).classList.remove('dim'));
+      const a = areaById[id];
+      info.style.display='block';
+      info.innerHTML = `<h3>${a.n}</h3><p>${a.d}</p><div class="irow">${areaDiscs[id].length} disciplinas nesta área.</div>`;
+    }
+  });
+});
+document.getElementById('scroller').addEventListener('click', clearAll);
+document.getElementById('resetbtn').addEventListener('click', clearAll);
+document.getElementById('search').addEventListener('input', function(){
+  const q = this.value.trim().toLowerCase();
+  if(!q) return clearAll();
+  clearDyn();
+  document.querySelectorAll('.node-box').forEach(n=>{
+    const txt = n.textContent.toLowerCase();
+    n.classList.toggle('dim', !txt.includes(q));
+    n.classList.remove('lit');
+  });
+  info.style.display='none';
+});
+</script>
+</body>
+</html>
